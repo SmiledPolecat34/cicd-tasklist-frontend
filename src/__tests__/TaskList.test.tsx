@@ -55,5 +55,65 @@ describe('TaskList', () => {
 		expect(screen.getByText('2 tâches')).toBeInTheDocument();
 	});
 
-	// ... TODO: Add more tests
+	it('shows error state', () => {
+		render(
+			<TaskList
+				tasks={[]}
+				loading={false}
+				error="Erreur réseau"
+				onToggle={vi.fn()}
+				onDelete={vi.fn()}
+				onEdit={vi.fn()}
+			/>
+		);
+		expect(screen.getByTestId('error')).toBeInTheDocument();
+		expect(screen.getByText('Erreur : Erreur réseau')).toBeInTheDocument();
+	});
+
+	it('shows empty state when there are no tasks', () => {
+		render(
+			<TaskList
+				tasks={[]}
+				loading={false}
+				error={null}
+				onToggle={vi.fn()}
+				onDelete={vi.fn()}
+				onEdit={vi.fn()}
+			/>
+		);
+		expect(screen.getByTestId('empty')).toBeInTheDocument();
+		expect(screen.queryByTestId('task-list')).not.toBeInTheDocument();
+	});
+
+	it('calls onToggle when a task checkbox is clicked', async () => {
+		const { default: userEvent } = await import('@testing-library/user-event');
+		const onToggle = vi.fn();
+		render(
+			<TaskList
+				tasks={mockTasks}
+				loading={false}
+				error={null}
+				onToggle={onToggle}
+				onDelete={vi.fn()}
+				onEdit={vi.fn()}
+			/>
+		);
+		const checkboxes = screen.getAllByRole('checkbox');
+		await userEvent.click(checkboxes[0]);
+		expect(onToggle).toHaveBeenCalledWith(mockTasks[0].id);
+	});
+
+	it('shows the correct count of completed tasks', () => {
+		render(
+			<TaskList
+				tasks={mockTasks}
+				loading={false}
+				error={null}
+				onToggle={vi.fn()}
+				onDelete={vi.fn()}
+				onEdit={vi.fn()}
+			/>
+		);
+		expect(screen.getByText('1 terminée')).toBeInTheDocument();
+	});
 });
